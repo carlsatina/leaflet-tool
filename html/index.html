@@ -4,10 +4,13 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<title>ECHONET Lite Emulator</title>
+    <title>Leaflet-Link Smart Meter Controller</title>
 	<link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" href="/lib/fontawesome-free/css/all.css">
 	<link rel="stylesheet" href="elemu.css">
+
+
+    <link rel="icon" type="image/x-icon" href="/images/favico.png">
 </head>
 
 <body>
@@ -17,21 +20,20 @@
 				<h1 class="d-inline-block">
 					<router-link to="/home">
 						<a class="navbar-brand">
-							<span v-if="lang === 'ja'">ECHONET Lite エミュレーター</span>
-							<span v-if="lang === 'en'">ECHONET Lite Emulator</span>
+                            <div class="col-auto"><img src="/images/logo.png" width="150"></div>
 						</a>
 					</router-link>
 				</h1>
 				<div class="d-inline-block float-right">
 					<!-- システム言語 -->
-					<select class="form-control-sm d-inline-block" v-model="lang" v-on:change="changeLang" v-if="lang === 'ja'">
+					<!-- <select class="form-control-sm d-inline-block" v-model="lang" v-on:change="changeLang" v-if="lang === 'ja'">
 						<option value="ja">日本語 (Japanese)</option>
 						<option value="en">英語 (English)</option>
-					</select>
-					<select class="form-control-sm d-inline-block" v-model="lang" v-on:change="changeLang" v-if="lang === 'en'">
+					</select> -->
+					<!-- <select class="form-control-sm d-inline-block" v-model="lang" v-on:change="changeLang" v-if="lang === 'en'">
 						<option value="ja">Japanese</option>
 						<option value="en">English</option>
-					</select>
+					</select> -->
 					<!-- WebSocket コネクション状態-->
 					<a class="btn">
 						<i class="fas fa-link" style="color:#00DD00;" v-if="wsStatus === true" title="WebSocket active"></i>
@@ -60,12 +62,12 @@
 			<router-view></router-view>
 		</main>
 
-		<footer class="footer">
+		<!-- <footer class="footer">
 			<div class="container">
 				<span v-if="lang === 'ja'">ECHONET Lite エミュレーター</span>
 				<span v-if="lang === 'en'">ECHONET Lite Emulator</span>
 			</div>
-		</footer>
+		</footer> -->
 	</div>
 
 	<!-- Bootstrap -->
@@ -104,305 +106,6 @@
 		</div>
 	</script>
 
-
-	<!-- ホーム画面: デバイスオブジェクトインスタンス -->
-	<script type="text/template" id="tmpl-component-eoj-panel">
-		<section class="card-deck accordion">
-			<div class="card box-shadow mb-12">
-				<div class="card-header">
-					<h2 class="d-inline h5">
-						<span v-if="lang === 'ja'">デバイスオブジェクトインスタンス</span>
-						<span v-if="lang === 'en'">Device Object Instances</span>
-					</h2>
-					<a class="btn btn-sm float-right" data-toggle="collapse" data-target="#eoj-panel-body">
-						<i class="fas fa-plus" hidden></i>
-						<i class="fas fa-minus"></i>
-					</a>
-				</div>
-				<div class="card-body collapse show" id="eoj-panel-body">
-					<div class="form-group">
-						<button class="btn btn-sm btn-secondary" type="button" v-on:click="showAddEoj">
-							<i class="fas fa-plus-circle"></i>
-							<span v-if="lang === 'ja'">EOJ 新規登録</span>
-							<span v-if="lang === 'en'">Add a new EOJ</span>
-						</button>
-					</div>
-					<div class="form-group">
-						<div class="input-group input-group-sm">
-							<select class="form-control" id="eoj-panel-eoj-list" v-model="eoj" v-on:change="updateEoj">
-								<option v-for="d in eoj_list" v-bind:value="d.eoj">
-									0x{{ d.eoj }}:
-									<template v-if="lang === 'ja'">{{ d.className.ja }}<!-- (リリース {{ d.release }})--></template>
-									<template v-if="lang === 'en'">{{ d.className.en }}<!-- (Release {{ d.release }})--></template>
-								</option>
-							</select>
-
-							<div class="input-group-append">
-								<button class="btn btn-secondary" type="button" v-on:click="reloadEdt">
-									<i class="fas fa-sync-alt"></i>
-									<span v-if="lang === 'ja'">再読込</span>
-									<span v-if="lang === 'en'">Reload</span>
-								</button>
-							</div>
-
-							<div class="input-group-append">
-								<button class="btn btn-secondary" type="button" v-on:click="editEoj">
-									<i class="far fa-edit"></i>
-									<span v-if="lang === 'ja'">編集</span>
-									<span v-if="lang === 'en'">Edit</span>
-								</button>
-							</div>
-							<div class="input-group-append">
-								<button class="btn btn-secondary" type="button" v-on:click="deleteEoj">
-									<i class="far fa-trash-alt"></i>
-									<span v-if="lang === 'ja'">削除</span>
-									<span v-if="lang === 'en'">Delete</span>
-								</button>
-							</div>
-						</div>
-					</div>
-					<table class="table table-sm">
-						<tbody style="display: block; height: 400px; overflow-y: scroll;">
-							<tr v-for="e in epc_list">
-								<td>
-									<code class="hex nowrap">{{ e.epc }}</code>
-								</td>
-								<td>
-									<template v-if="e.propertyName">
-										<template v-if="lang === 'ja'">{{ e.propertyName.ja }}</template>
-										<template v-if="lang === 'en'">{{ e.propertyName.en }}</template>
-									</template>
-								</td>
-								<td>
-									<span v-if="e.map.get" class="badge badge-success">Get</span>
-									<span v-else class="badge badge-secondary">Get</span>
-									<span v-if="e.map.set" class="badge badge-success">Set</span>
-									<span v-else class="badge badge-secondary">Set</span>
-									<span v-if="e.map.inf" class="badge badge-success">Inf</span>
-									<span v-else class="badge badge-secondary">Inf</span>
-								</td>
-								<td>
-									<router-link v-bind:to="'/editEdt/' + eoj + '/' + e.epc">
-										<i class="fas fa-edit"></i>
-									</router-link>
-								</td>
-								<td class="edt-detail">
-									<template v-if="e.edt">
-										<div>
-											<code class="hex truncate">{{ e.edt.hex }}</code>
-										</div>
-										<template v-if="e.edt.data">
-											<div v-if="e.edt.data.type === 'state'">
-												<template v-if="e.edt.data.state">
-													<span v-if="lang === 'ja'">{{ e.edt.data.state.ja }}</span>
-													<span v-if="lang === 'en'">{{ e.edt.data.state.en }}</span>
-												</template>
-											</div>
-											<div v-if="e.edt.data.type === 'number'">
-												<span>{{ e.edt.data.number.value}}</span>
-												<span v-if="e.edt.data.number.unit">{{ e.edt.data.number.unit }}</span>
-												<span v-if="e.edt.data.number.special">({{ e.edt.data.number.special }})</span>
-												<span v-if="e.edt.data.number.coefficient">
-													(
-													<span v-if="lang === 'ja'">係数:</span>
-													<span v-if="lang === 'en'">Coefficient:</span>
-													<template v-for="co in e.edt.data.number.coefficient">
-														<code class="coefficient">{{ co }}</code>
-													</template>
-													)
-												</span>
-											</div>
-											<div v-if="e.edt.data.type === 'level'">
-												<span>Level {{ e.edt.data.level }}</span>
-											</div>
-											<div v-if="e.edt.data.type === 'date-time'">
-												<span>{{ e.edt.data.dateTime }}</span>
-											</div>
-											<div v-if="e.edt.data.type === 'date'">
-												<span>{{ e.edt.data.date }}</span>
-											</div>
-											<div v-if="e.edt.data.type === 'time'">
-												<span>{{ e.edt.data.time }}</span>
-											</div>
-											<div v-if="e.edt.data.type === 'numericValue'">
-												<span>{{ e.edt.data.numericValue }}</span>
-											</div>
-											<div v-if="e.edt.data.type === 'raw'">
-												<div v-if="e.edt.data.propertyList">
-													<ul>
-														<li v-for="pd in e.edt.data.propertyList">
-															<code class="hex">{{ pd.epc }}</code> |
-															<template v-if="pd.propertyName">
-																<span v-if="lang === 'ja'">{{ pd.propertyName.ja }}</span>
-																<span v-if="lang === 'en'">{{ pd.propertyName.en }}</span>
-															</template>
-														</li>
-													</ul>
-												</div>
-												<div v-if="e.edt.data.manufacturerName">
-													<span v-if="lang === 'ja'">{{ e.edt.data.manufacturerName.ja }}</span>
-													<span v-if="lang === 'en'">{{ e.edt.data.manufacturerName.en }}</span>
-												</div>
-												<div v-if="e.edt.data.release">
-													{{ e.edt.data.release }}
-												</div>
-											</div>
-											<div v-if="e.edt.data.type === 'bitmap'">
-												<div v-for="o in e.edt.data.bitmap">
-													<dl>
-														<dt>
-															<span v-if="lang === 'ja'">{{ o.descriptions.ja }}</span>
-															<span v-if="lang === 'en'">{{ o.descriptions.en }}</span>
-														</dt>
-														<dd>
-															<div v-if="o.type === 'state'">
-																<span v-if="lang === 'ja'">{{ o.state.ja }}</span>
-																<span v-if="lang === 'en'">{{ o.state.en }}</span>
-															</div>
-															<div v-if="o.type === 'number'">
-																<span>{{ o.number.value }}</span>
-																<span v-if="o.number.unit">{{ o.number.unit }}</span>
-																<span v-if="o.number.coefficient">
-																	(
-																	<span v-if="lang === 'ja'">係数:</span>
-																	<span v-if="lang === 'en'">Coefficient:</span>
-																	<template v-for="co in o.number.coefficient">
-																		<code class="coefficient">{{ co }}</code>
-																	</template>
-																	)
-																</span>
-															</div>
-															<div v-if="o.type === 'level'">
-																<span>Level {{ o.level }}</span>
-															</div>
-														</dd>
-													</dl>
-												</div>
-											</div>
-											<div v-if="e.edt.data.type === 'array'">
-												<div v-for="o of e.edt.data.array">
-													<div v-if="o.type === 'number'">
-														<span>{{ o.number.value }}</span>
-														<span v-if="o.number.unit">{{ o.number.unit }}</span>
-														<span v-if="o.number.coefficient">
-															(
-															<span v-if="lang === 'ja'">係数:</span>
-															<span v-if="lang === 'en'">Coefficient:</span>
-															<template v-for="co in o.number.coefficient">
-																<code class="coefficient">{{ co }}</code>
-															</template>
-															)
-														</span>
-													</div>
-													<div v-if="o.type === 'state'">
-														<template v-if="o.state">
-															<span v-if="lang === 'ja'">{{ o.state.ja }}</span>
-															<span v-if="lang === 'en'">{{ o.state.en }}</span>
-														</template>
-													</div>
-												</div>
-											</div>
-											<div v-if="e.edt.data.type === 'object'">
-												<div v-for="o in e.edt.data.object">
-													<dl>
-														<dt>
-															<span v-if="lang === 'ja'">{{ o.elementName.ja }}</span>
-															<span v-if="lang === 'en'">{{ o.elementName.en }}</span>
-														</dt>
-														<dd>
-															<div v-if="o.type === 'state'">
-																<template v-if="o.state">
-																	<span v-if="lang === 'ja'">{{ o.state.ja }}</span>
-																	<span v-if="lang === 'en'">{{ o.state.en }}</span>
-																</template>
-															</div>
-															<div v-if="o.type === 'number'">
-																<span>{{ o.number.value }}</span>
-																<span v-if="o.number.unit">{{ o.number.unit }}</span>
-																<span v-if="o.number.coefficient">
-																	(
-																	<span v-if="lang === 'ja'">係数:</span>
-																	<span v-if="lang === 'en'">Coefficient:</span>
-																	<template v-for="co in o.number.coefficient">
-																		<code class="coefficient">{{ co }}</code>
-																	</template>
-																	)
-																</span>
-															</div>
-															<div v-if="o.type === 'date-time'">
-																<span>{{ o.dateTime }}</span>
-															</div>
-															<div v-if="o.type === 'date'">
-																<span>{{ o.date }}</span>
-															</div>
-															<div v-if="o.type === 'time'">
-																<span>{{ o.time }}</span>
-															</div>
-															<div v-if="o.type === 'raw'">
-																<span><code class="hex truncate">{{ o.raw }}</code></span>
-															</div>
-															<div v-if="o.type === 'array'">
-																<ul>
-																	<li v-for="el in o.array">
-																		<div v-if="el.type === 'state'">
-																			<span v-if="lang === 'ja'">{{ el.state.ja }}</span>
-																			<span v-if="lang === 'en'">{{ el.state.en }}</span>
-																		</div>
-																		<div v-if="el.type === 'number'">
-																			<span>{{ el.number.value }}</span>
-																			<span v-if="el.number.unit">{{ el.number.unit }}</span>
-																		</div>
-																		<div v-if="el.type === 'date-time'">
-																			<span>{{ el.dateTime }}</span>
-																		</div>
-																		<div v-if="el.type === 'date'">
-																			<span>{{ el.date }}</span>
-																		</div>
-																		<div v-if="el.type === 'time'">
-																			<span>{{ el.time }}</span>
-																		</div>
-																		<div v-if="el.type === 'raw'">
-																			<code class="hex">{{ el.raw }}</code>
-																			<span v-if="el.className">
-																				<span v-if="lang === 'ja'">{{ el.className.ja }}</span>
-																				<span v-if="lang === 'en'">{{ el.className.en }}</span>
-																			</span>
-																		</div>
-																		<div v-if="el.type === 'object'">
-																			<dl>
-																				<template v-for="o in el.object">
-																					<dt>
-																						<span v-if="lang === 'ja'">{{ o.elementName.ja }}</span>
-																						<span v-if="lang === 'en'">{{ o.elementName.en }}</span>
-																					</dt>
-																					<dd>
-																						<template v-if="o.type === 'number'">
-																							{{ o.number.value}}
-																							<template v-if="o.number.unit">
-																								{{ o.number.unit }}
-																							</template>
-																						</template>
-																					</dd>
-																				</template>
-																			</dl>
-																		</div>
-																	</li>
-																</ul>
-															</div>
-														</dd>
-													</dl>
-												</div>
-											</div>
-										</template>
-									</template>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</section>
-	</script>
 
 	<!-- ホーム画面: リモートデバイス一覧 (コントローラーの場合のみ表示) -->
 	<script type="text/template" id="tmpl-component-remote-device-list">
@@ -502,7 +205,7 @@
 							</div>
 							<div class="col-sm-6">
 								<label for="send-packet-tid" class="col-form-label col-form-label-sm">TID</label>
-								<input type="number" class="form-control form-control-sm" id="send-packet-tid" v-bind:placeholder="[ lang === 'ja' ? '指定がなければ自動採番' : 'Auto numbering if not specified' ]" v-model="packet.tid">
+								<input type="number" class="form-control form-control-sm" id="send-packet-tid" v-bind:placeholder="[ lang === 'ja' ? '指定がなければ自動採番' : 'Auto numbering if not specified' ]" v-model="packet.tid" disabled>
 							</div>
 						</div>
 						<div class="form-group row">
@@ -510,7 +213,7 @@
 								<div class="row">
 									<div class="form-group col-md-8">
 										<label for="send-packet-seoj-class-code" class="col-form-label col-form-label-sm">SEOJ</label>
-										<select class="form-control form-control-sm" id="send-packet-seoj-class-code" v-model="packet.seoj.class_code" v-on:change="updateEpcList">
+										<select class="form-control form-control-sm" id="send-packet-seoj-class-code" v-model="packet.seoj.class_code" v-on:change="updateEpcList" disabled>
 											<option value="">
 												<template v-if="lang === 'ja'">クラスを選択してください</template>
 												<template v-if="lang === 'en'">Select a class</template>
@@ -527,7 +230,7 @@
 											<template v-if="lang === 'ja'">インスタンス番号</template>
 											<template v-if="lang === 'en'">Instance Number</template>
 										</label>
-										<select class="form-control form-control-sm" id="send-packet-seoj-instance" v-model="packet.seoj.instance">
+										<select class="form-control form-control-sm" id="send-packet-seoj-instance" v-model="packet.seoj.instance" disabled>
 											<option value="">
 												<template v-if="lang === 'ja'">インスタンスを選択してください</template>
 												<template v-if="lang === 'en'">Select an instance</template>
@@ -572,7 +275,7 @@
 											<template v-if="lang === 'ja'">インスタンス番号</template>
 											<template v-if="lang === 'en'">Instance Number</template>
 										</label>
-										<select class="form-control form-control-sm" id="send-packet-deoj-instance" v-model="packet.deoj.instance">
+										<select class="form-control form-control-sm" id="send-packet-deoj-instance" v-model="packet.deoj.instance" disabled>
 											<option value="">
 												<template v-if="lang === 'ja'">インスタンスを選択してください</template>
 												<template v-if="lang === 'en'">Select an instance</template>
