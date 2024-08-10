@@ -400,7 +400,7 @@
 							</div>
 							<div class="col-sm-6">
 								<label for="send-packet-opc" class="col-form-label col-form-label-sm">OPC</label>
-								<select class="form-control form-control-sm" id="send-packet-deoj-instance" v-model="packet.opc">
+								<select class="form-control form-control-sm" id="send-packet-deoj-instance" v-model="packet.opc" disabled>
 									<option value="">
 										<template v-if="lang === 'ja'">OPC を選択してください</template>
 										<template v-if="lang === 'en'">Select an OPC</template>
