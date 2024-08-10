@@ -77,7 +77,7 @@ class Emulator {
     // HTTP REST API エンドポイントの構築
     this._api = new mHttpApi(this._conf, this._device, this._uconf, mMra, mManufacturerTable);
 
-    this._console.printSysInfo('This emulator is ready');
+    this._console.printSysInfo('This tool is ready');
   }
 
   _readVersion() {
